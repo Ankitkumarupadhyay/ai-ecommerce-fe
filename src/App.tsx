@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider, useQuery } from '@tanstack/react-query';
 import { GoogleOAuthProvider } from '@react-oauth/google';
-import { Bot } from 'lucide-react';
+import { Bot, X } from 'lucide-react';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { AIChatWidget } from '@/components/AIChatWidget';
@@ -108,9 +108,8 @@ function AppContent() {
         title="AI Support Assistant"
         className="fixed bottom-6 right-6 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-tr from-violet-600 to-indigo-500 shadow-xl shadow-violet-700/40 hover:scale-110 hover:shadow-violet-600/60 active:scale-95 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-violet-400 focus:ring-offset-2 focus:ring-offset-zinc-950"
       >
-        {/* Animated pulse ring */}
-        <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-violet-500 opacity-20" />
-        <Bot className="relative h-6 w-6 text-white" />
+        <span className={`absolute inline-flex h-full w-full rounded-full bg-violet-500 opacity-20 ${isAIChatOpen ? '' : 'animate-ping'}`} />
+        {isAIChatOpen ? <X className="relative h-6 w-6 text-white" /> : <Bot className="relative h-6 w-6 text-white" />}
       </button>
 
       {/* AI Chat Panel */}
