@@ -3,7 +3,7 @@ import { useQuery, useMutation } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { productsApi, cartApi } from '@/api/services';
 import { formatCurrency } from '@/lib/utils';
-import { useAuthStore } from '@/store/authStore';
+import { useAppSelector } from '@/store/hooks';
 import { ShoppingBag, CheckCircle2, Sparkles, Filter } from 'lucide-react';
 
 interface Product {
@@ -26,7 +26,7 @@ interface HomePageProps {
 export const HomePage: React.FC<HomePageProps> = ({ searchQuery, onCartUpdated }) => {
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
   const [addedProductId, setAddedProductId] = useState<string | null>(null);
-  const { isAuthenticated } = useAuthStore();
+  const isAuthenticated = useAppSelector((state) => state.auth.isAuthenticated);
 
   const categories = ['All', 'Electronics', 'Clothing', 'Accessories', 'Home'];
 
@@ -70,17 +70,17 @@ export const HomePage: React.FC<HomePageProps> = ({ searchQuery, onCartUpdated }
       </section>
 
       {/* Category Filter Bar */}
-      <div className="flex items-center justify-between gap-4 overflow-x-auto pb-2 border-b border-zinc-800/60">
-        <div className="flex items-center gap-2">
+      <div className="flex flex-wrap sm:flex-nowrap items-center justify-between gap-3 pb-2 border-b border-zinc-800/60">
+        <div className="flex items-center gap-2 shrink-0">
           <Filter className="h-4 w-4 text-zinc-400" />
           <span className="text-xs font-medium text-zinc-400">Categories:</span>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap overflow-x-auto pb-0.5">
           {categories.map((cat) => (
             <button
               key={cat}
               onClick={() => setSelectedCategory(cat)}
-              className={`px-4 py-1.5 rounded-full text-xs font-medium transition ${
+              className={`px-3 sm:px-4 py-1.5 rounded-full text-xs font-medium transition whitespace-nowrap ${
                 selectedCategory === cat
                   ? 'bg-violet-600 text-white shadow-md shadow-violet-600/20'
                   : 'bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-zinc-200'

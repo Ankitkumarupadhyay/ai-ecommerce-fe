@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { GoogleLogin, CredentialResponse } from '@react-oauth/google';
-import { useAuthStore } from '@/store/authStore';
+import { useAppDispatch, useAppSelector } from '@/store/hooks';
+import { setAuth, logout } from '@/store/authSlice';
 import { apiClient } from '@/api/client';
 import { ShoppingBag, LogOut, Shield, Search, AlertCircle, X } from 'lucide-react';
 
@@ -16,7 +17,8 @@ export const Navbar: React.FC<NavbarProps> = ({
   searchQuery = '',
   setSearchQuery,
 }) => {
-  const { user, isAuthenticated, logout, setAuth } = useAuthStore();
+  const dispatch = useAppDispatch();
+  const { user, isAuthenticated } = useAppSelector((state) => state.auth);
   const navigate = useNavigate();
   const [showConfigModal, setShowConfigModal] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
@@ -34,7 +36,7 @@ export const Navbar: React.FC<NavbarProps> = ({
       });
 
       const { access_token, user: authUser } = res.data;
-      setAuth(authUser, access_token);
+      dispatch(setAuth({ user: authUser, token: access_token }));
     } catch (err: any) {
       console.error('Google Auth Failed:', err);
       setAuthError(err.response?.data?.detail || 'Google Authentication failed on backend server.');
@@ -45,21 +47,21 @@ export const Navbar: React.FC<NavbarProps> = ({
 
   return (
     <header className="sticky top-0 z-40 w-full border-b border-zinc-800 bg-zinc-950/80 backdrop-blur-md">
-      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto flex h-14 sm:h-16 max-w-7xl items-center justify-between gap-3 px-4 sm:px-6 lg:px-8">
         
         {/* Brand Logo */}
-        <Link to="/" className="flex items-center gap-2 text-xl font-bold tracking-tight text-white hover:opacity-90">
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-tr from-violet-600 to-indigo-500 shadow-lg shadow-violet-500/20">
-            <ShoppingBag className="h-5 w-5 text-white" />
+        <Link to="/" className="flex items-center gap-2 text-lg sm:text-xl font-bold tracking-tight text-white hover:opacity-90 shrink-0">
+          <div className="flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-xl bg-gradient-to-tr from-violet-600 to-indigo-500 shadow-lg shadow-violet-500/20">
+            <ShoppingBag className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
           </div>
           <span className="bg-gradient-to-r from-white via-zinc-200 to-zinc-400 bg-clip-text text-transparent">
             AuraStore
           </span>
         </Link>
 
-        {/* Search Bar */}
+        {/* Search Bar — desktop only (md+) */}
         {setSearchQuery && (
-          <div className="hidden md:flex flex-1 max-w-md mx-8 relative">
+          <div className="hidden md:flex flex-1 max-w-md mx-6 relative">
             <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
             <input
               type="text"
@@ -72,17 +74,17 @@ export const Navbar: React.FC<NavbarProps> = ({
         )}
 
         {/* Right Actions */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3 shrink-0">
           
           {/* Cart Icon */}
           <Link
             to="/cart"
-            className="relative flex h-10 w-10 items-center justify-center rounded-full bg-zinc-900 border border-zinc-800 text-zinc-300 hover:text-white hover:border-zinc-700 transition"
+            className="relative flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-full bg-zinc-900 border border-zinc-800 text-zinc-300 hover:text-white hover:border-zinc-700 transition"
             aria-label="View Cart"
           >
-            <ShoppingBag className="h-5 w-5" />
+            <ShoppingBag className="h-4 w-4 sm:h-5 sm:w-5" />
             {cartCount > 0 && (
-              <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-violet-600 text-[11px] font-bold text-white shadow-md">
+              <span className="absolute -top-1 -right-1 flex h-4 w-4 sm:h-5 sm:w-5 items-center justify-center rounded-full bg-violet-600 text-[10px] sm:text-[11px] font-bold text-white shadow-md">
                 {cartCount}
               </span>
             )}
@@ -90,7 +92,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 
           {/* User Auth Section */}
           {isAuthenticated && user ? (
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5 sm:gap-2">
               <Link
                 to="/orders"
                 className="hidden sm:inline-flex text-xs font-medium text-zinc-400 hover:text-white px-2 py-1 transition"
@@ -101,35 +103,35 @@ export const Navbar: React.FC<NavbarProps> = ({
               {user.role === 'admin' && (
                 <Link
                   to="/admin"
-                  className="flex items-center gap-1 text-xs font-semibold px-2.5 py-1.5 rounded-lg bg-emerald-950/80 border border-emerald-800/60 text-emerald-400 hover:bg-emerald-900/80 transition"
+                  className="flex items-center gap-1 text-xs font-semibold px-2 sm:px-2.5 py-1.5 rounded-lg bg-emerald-950/80 border border-emerald-800/60 text-emerald-400 hover:bg-emerald-900/80 transition"
                 >
                   <Shield className="h-3.5 w-3.5" />
-                  <span>Admin</span>
+                  <span className="hidden sm:inline">Admin</span>
                 </Link>
               )}
 
-              <div className="flex items-center gap-2 pl-2 border-l border-zinc-800">
+              <div className="flex items-center gap-1.5 sm:gap-2 pl-1.5 sm:pl-2 border-l border-zinc-800">
                 <img
                   src={user.picture || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150'}
                   alt={user.name}
-                  className="h-8 w-8 rounded-full border border-zinc-700 object-cover"
+                  className="h-7 w-7 sm:h-8 sm:w-8 rounded-full border border-zinc-700 object-cover"
                 />
                 <button
                   onClick={() => {
-                    logout();
+                    dispatch(logout());
                     navigate('/');
                   }}
-                  className="p-2 text-zinc-400 hover:text-red-400 transition"
+                  className="p-1.5 sm:p-2 text-zinc-400 hover:text-red-400 transition"
                   title="Sign Out"
                 >
-                  <LogOut className="h-4 w-4" />
+                  <LogOut className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                 </button>
               </div>
             </div>
           ) : (
-            <div className="flex items-center gap-2">
+            <div className="flex items-center">
               {isGoogleConfigured ? (
-                <div className="scale-90 origin-right">
+                <div className="scale-75 sm:scale-90 origin-right">
                   <GoogleLogin
                     onSuccess={handleGoogleSuccess}
                     onError={() => setAuthError('Google Sign-In popup failed or was closed.')}
@@ -141,15 +143,31 @@ export const Navbar: React.FC<NavbarProps> = ({
               ) : (
                 <button
                   onClick={() => setShowConfigModal(true)}
-                  className="px-3.5 py-1.5 rounded-lg bg-violet-600 text-white text-xs font-semibold hover:bg-violet-500 shadow-md shadow-violet-600/20 transition"
+                  className="px-3 sm:px-3.5 py-1.5 rounded-lg bg-violet-600 text-white text-xs font-semibold hover:bg-violet-500 shadow-md shadow-violet-600/20 transition"
                 >
-                  Sign In with Google
+                  Sign In
                 </button>
               )}
             </div>
           )}
         </div>
       </div>
+
+      {/* Mobile Search Bar — shows below nav on small screens */}
+      {setSearchQuery && (
+        <div className="md:hidden border-t border-zinc-800/60 px-4 py-2 bg-zinc-950/60">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-zinc-400" />
+            <input
+              type="text"
+              placeholder="Search products..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-9 pr-4 py-1.5 bg-zinc-900 border border-zinc-800 rounded-full text-xs text-zinc-100 placeholder:text-zinc-500 focus:outline-none focus:border-violet-500 transition"
+            />
+          </div>
+        </div>
+      )}
 
       {/* Auth Error Toast */}
       {authError && (
@@ -187,8 +205,8 @@ export const Navbar: React.FC<NavbarProps> = ({
               <p>VITE_GOOGLE_CLIENT_ID=your_real_client_id.apps.googleusercontent.com</p>
             </div>
 
-            <p className="text-[11px] text-zinc-400">
-              In the meantime, you can instantly test authenticated customer features using <strong>Instant Demo Sign-In</strong>:
+            <p className="text-xs text-zinc-400">
+              Once set, save the file and restart the dev server — the Google Sign-In button will appear automatically.
             </p>
 
             <div className="flex justify-end gap-2 pt-2">

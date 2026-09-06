@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Link, useNavigate } from 'react-router-dom';
 import { apiClient } from '@/api/client';
 import { formatCurrency } from '@/lib/utils';
-import { useAuthStore } from '@/store/authStore';
+import { useAppSelector } from '@/store/hooks';
 import { ShoppingBag, Trash2, ArrowRight, ArrowLeft, Lock } from 'lucide-react';
 
 interface CartItem {
@@ -26,7 +26,7 @@ interface CartData {
 export const CartPage: React.FC<{ onCartUpdated?: () => void }> = ({ onCartUpdated }) => {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
-  const { isAuthenticated } = useAuthStore();
+  const isAuthenticated = useAppSelector((state) => state.auth.isAuthenticated);
 
   const { data: cart, isLoading, isError } = useQuery<CartData>({
     queryKey: ['cart'],
@@ -76,26 +76,21 @@ export const CartPage: React.FC<{ onCartUpdated?: () => void }> = ({ onCartUpdat
 
   if (!isAuthenticated) {
     return (
-      <div className="max-w-md mx-auto my-12 text-center p-8 bg-zinc-900/60 border border-zinc-800 rounded-3xl space-y-4">
-        <ShoppingBag className="h-12 w-12 text-zinc-500 mx-auto" />
-        <h2 className="text-xl font-bold text-white">Your Cart is Empty</h2>
-        <p className="text-xs text-zinc-400">Please sign in to manage your shopping cart.</p>
-        <button
-          onClick={() => {
-            const mockUser = {
-              id: '65f01234567890abcdef2222',
-              email: 'customer@example.com',
-              name: 'Demo Customer',
-              picture: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150',
-              role: 'customer' as const
-            };
-            useAuthStore.getState().setAuth(mockUser, 'mock_google_token_customer');
-            queryClient.invalidateQueries({ queryKey: ['cart'] });
-          }}
-          className="w-full py-2.5 rounded-xl bg-violet-600 font-bold text-xs text-white hover:bg-violet-500 transition shadow-lg shadow-violet-600/20"
+      <div className="max-w-md mx-auto my-12 text-center p-8 bg-zinc-900/60 border border-zinc-800 rounded-3xl space-y-5">
+        <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-violet-950/60 border border-violet-800/40 mx-auto">
+          <ShoppingBag className="h-8 w-8 text-violet-400" />
+        </div>
+        <div className="space-y-1">
+          <h2 className="text-xl font-bold text-white">Sign In to View Your Cart</h2>
+          <p className="text-xs text-zinc-400">You need to be signed in to manage your shopping cart and checkout.</p>
+        </div>
+        <Link
+          to="/"
+          className="inline-flex items-center justify-center gap-2 w-full py-2.5 rounded-xl bg-violet-600 font-bold text-xs text-white hover:bg-violet-500 transition shadow-lg shadow-violet-600/20"
         >
-          Sign In to Access Cart
-        </button>
+          <ArrowLeft className="h-4 w-4" />
+          Go to Store to Sign In
+        </Link>
       </div>
     );
   }
@@ -140,15 +135,16 @@ export const CartPage: React.FC<{ onCartUpdated?: () => void }> = ({ onCartUpdat
           {items.map((item) => (
             <div
               key={item.product_id}
-              className="flex items-center justify-between gap-4 p-4 rounded-2xl bg-zinc-900/80 border border-zinc-800"
+              className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-4 rounded-2xl bg-zinc-900/80 border border-zinc-800"
             >
-              <div className="flex items-center gap-4">
+              {/* Product info */}
+              <div className="flex items-center gap-3 flex-1 min-w-0">
                 <img
                   src={item.image_url}
                   alt={item.name}
-                  className="h-16 w-16 rounded-xl object-cover bg-zinc-950 border border-zinc-800"
+                  className="h-14 w-14 sm:h-16 sm:w-16 shrink-0 rounded-xl object-cover bg-zinc-950 border border-zinc-800"
                 />
-                <div>
+                <div className="min-w-0">
                   <h3 className="font-bold text-white text-sm line-clamp-1">{item.name}</h3>
                   <p className="text-xs text-violet-400 font-semibold mt-0.5">
                     {formatCurrency(item.price)} each
@@ -156,9 +152,10 @@ export const CartPage: React.FC<{ onCartUpdated?: () => void }> = ({ onCartUpdat
                 </div>
               </div>
 
-              <div className="flex items-center gap-6">
+              {/* Controls row */}
+              <div className="flex items-center justify-between sm:justify-end gap-4 sm:gap-6">
                 {/* Quantity Controls */}
-                <div className="flex items-center gap-2 bg-zinc-950 border border-zinc-800 rounded-xl p-1">
+                <div className="flex items-center gap-1.5 bg-zinc-950 border border-zinc-800 rounded-xl p-1">
                   <button
                     onClick={() =>
                       updateQuantityMutation.mutate({
@@ -169,7 +166,7 @@ export const CartPage: React.FC<{ onCartUpdated?: () => void }> = ({ onCartUpdat
                     disabled={item.quantity <= 1 || updateQuantityMutation.isPending}
                     className="w-7 h-7 rounded-lg bg-zinc-900 text-zinc-300 hover:bg-zinc-800 disabled:opacity-30 text-xs font-bold"
                   >
-                    -
+                    −
                   </button>
                   <span className="w-6 text-center text-xs font-bold text-white">{item.quantity}</span>
                   <button
@@ -186,14 +183,12 @@ export const CartPage: React.FC<{ onCartUpdated?: () => void }> = ({ onCartUpdat
                   </button>
                 </div>
 
-                <div className="text-right min-w-[70px]">
-                  <p className="font-bold text-white text-sm">{formatCurrency(item.line_total)}</p>
-                </div>
+                <p className="font-bold text-white text-sm min-w-[60px] text-right">{formatCurrency(item.line_total)}</p>
 
                 <button
                   onClick={() => removeItemMutation.mutate(item.product_id)}
                   disabled={removeItemMutation.isPending}
-                  className="text-zinc-500 hover:text-red-400 p-1.5 transition"
+                  className="text-zinc-500 hover:text-red-400 p-1.5 transition shrink-0"
                   title="Remove Item"
                 >
                   <Trash2 className="h-4 w-4" />

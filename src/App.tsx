@@ -16,7 +16,7 @@ import { OrdersPage } from '@/pages/OrdersPage';
 import { OrderDetailPage } from '@/pages/OrderDetailPage';
 import { AdminDashboardPage } from '@/pages/AdminDashboardPage';
 import { apiClient } from '@/api/client';
-import { useAuthStore } from '@/store/authStore';
+import { useAppSelector } from '@/store/hooks';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -32,7 +32,7 @@ const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || 'your_google_c
 function AppContent() {
   const [searchQuery, setSearchQuery] = useState('');
   const [isAIChatOpen, setIsAIChatOpen] = useState(false);
-  const { isAuthenticated } = useAuthStore();
+  const isAuthenticated = useAppSelector((state) => state.auth.isAuthenticated);
 
   const { data: cartData, refetch: refetchCart } = useQuery({
     queryKey: ['cart'],
@@ -106,7 +106,7 @@ function AppContent() {
         onClick={() => setIsAIChatOpen((open) => !open)}
         aria-label="Open AI Support Assistant"
         title="AI Support Assistant"
-        className="fixed bottom-6 right-6 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-tr from-violet-600 to-indigo-500 shadow-xl shadow-violet-700/40 hover:scale-110 hover:shadow-violet-600/60 active:scale-95 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-violet-400 focus:ring-offset-2 focus:ring-offset-zinc-950"
+        className="fixed bottom-20 right-6 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-tr from-violet-600 to-indigo-500 shadow-xl shadow-violet-700/40 hover:scale-110 hover:shadow-violet-600/60 active:scale-95 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-violet-400 focus:ring-offset-2 focus:ring-offset-zinc-950"
       >
         <span className={`absolute inline-flex h-full w-full rounded-full bg-violet-500 opacity-20 ${isAIChatOpen ? '' : 'animate-ping'}`} />
         {isAIChatOpen ? <X className="relative h-6 w-6 text-white" /> : <Bot className="relative h-6 w-6 text-white" />}

@@ -1,7 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Bot, X, Send, Sparkles, User, Loader2, LogIn, ShieldAlert } from 'lucide-react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import { apiClient } from '@/api/client';
-import { useAuthStore } from '@/store/authStore';
+import { useAppSelector } from '@/store/hooks';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 const GUEST_CHAT_KEY = 'ai_guest_chat_count';
@@ -31,7 +33,7 @@ interface AIChatWidgetProps {
 
 // ─── Component ────────────────────────────────────────────────────────────────
 export const AIChatWidget: React.FC<AIChatWidgetProps> = ({ isOpen, onClose }) => {
-  const { isAuthenticated } = useAuthStore();
+  const isAuthenticated = useAppSelector((state) => state.auth.isAuthenticated);
   const [input, setInput] = useState('');
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [showLoginGate, setShowLoginGate] = useState(false);
@@ -133,7 +135,7 @@ export const AIChatWidget: React.FC<AIChatWidgetProps> = ({ isOpen, onClose }) =
   ];
 
   return (
-    <div className="fixed bottom-24 right-6 z-50 w-96 max-w-[calc(100vw-2rem)] rounded-2xl border border-zinc-800 bg-zinc-900/95 shadow-2xl backdrop-blur-xl flex flex-col h-[540px]">
+    <div className="fixed bottom-36 right-6 z-50 w-96 max-w-[calc(100vw-2rem)] rounded-2xl border border-zinc-800 bg-zinc-900/95 shadow-2xl backdrop-blur-xl flex flex-col h-[540px] max-h-[calc(100vh-10rem)]">
 
       {/* ── Header ─────────────────────────────────────────────────────────── */}
       <div className="flex items-center justify-between border-b border-zinc-800 px-4 py-3 shrink-0">
@@ -175,13 +177,13 @@ export const AIChatWidget: React.FC<AIChatWidgetProps> = ({ isOpen, onClose }) =
             )}
 
             <div
-              className={`rounded-2xl px-3.5 py-2.5 max-w-[85%] whitespace-pre-wrap ${
+              className={`rounded-2xl px-3.5 py-2.5 max-w-[85%] ${
                 msg.sender === 'user'
                   ? 'bg-violet-600 text-white rounded-tr-none'
                   : 'bg-zinc-800/90 text-zinc-200 border border-zinc-700/50 rounded-tl-none'
               }`}
             >
-              {msg.text}
+              <ReactMarkdown remarkPlugins={[remarkGfm]}>{msg.text}</ReactMarkdown>
               {msg.toolsUsed && msg.toolsUsed.length > 0 && (
                 <div className="mt-1.5 pt-1 border-t border-zinc-700/40 text-[10px] text-violet-300 font-mono flex items-center gap-1">
                   <span>Tools:</span>

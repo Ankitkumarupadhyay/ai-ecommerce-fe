@@ -3,7 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { apiClient } from '@/api/client';
 import { formatCurrency } from '@/lib/utils';
-import { useAuthStore } from '@/store/authStore';
+import { useAppSelector } from '@/store/hooks';
 import { ShoppingBag, ArrowLeft, CheckCircle2, ShieldCheck, Truck, RefreshCw } from 'lucide-react';
 
 export const ProductDetailPage: React.FC<{ onCartUpdated?: () => void }> = ({ onCartUpdated }) => {
@@ -11,7 +11,7 @@ export const ProductDetailPage: React.FC<{ onCartUpdated?: () => void }> = ({ on
   const [quantity, setQuantity] = useState<number>(1);
   const [added, setAdded] = useState(false);
   const navigate = useNavigate();
-  const { isAuthenticated } = useAuthStore();
+  const isAuthenticated = useAppSelector((state) => state.auth.isAuthenticated);
 
   const { data: product, isLoading, isError } = useQuery({
     queryKey: ['product', id],
