@@ -130,7 +130,7 @@ export const AIChatWidget: React.FC<AIChatWidgetProps> = ({ isOpen, onClose }) =
 
   const quickPrompts = [
     'What products are available?',
-    'What is the price of Wireless Headphones?',
+    'What is the price of Water-Resistant Commuter Backpack?',
     'What is the status of my order?'
   ];
 
