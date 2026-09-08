@@ -7,7 +7,7 @@ import { useAppSelector } from '@/store/hooks';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 const GUEST_CHAT_KEY = 'ai_guest_chat_count';
-const GUEST_CHAT_LIMIT = 3;
+const GUEST_CHAT_LIMIT = 10;
 
 function getGuestCount(): number {
   return parseInt(localStorage.getItem(GUEST_CHAT_KEY) || '0', 10);
